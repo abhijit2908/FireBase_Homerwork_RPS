@@ -24,7 +24,7 @@
   var turnRef = database.ref('/turn/');
   var chatRef= database.ref("/chat");
 
-chatRef.onDisconnect().remove();
+
 
   var choices = ["Rock", "Paper", "Scissors"];
 
@@ -158,6 +158,75 @@ else if(key === '2'){
 
  }
  })
+
+playersRef.on("child_changed", function(statsnapshot){
+
+
+var key = statsnapshot.key;
+
+
+if(key === '1' ){
+      
+
+
+      player1.wins = statsnapshot.val().wins;
+      player1.losses = statsnapshot.val().losses;
+
+
+
+     console.log(player1.wins);
+
+     console.log(player1.losses);
+
+    $('#player1Stats').html("Wins: " + player1.wins + " Losses: " +player1.losses+ '<br>');
+
+    
+}
+
+else if(key === '2'){
+      
+
+ 
+      player2.wins = statsnapshot.val().wins;
+      player2.losses = statsnapshot.val().losses;
+
+      console.log(player2.wins)
+      console.log(player2.losses)
+      
+   
+  $('#player2Stats').html("Wins: " + player2.wins + " Losses: " +player2.losses+ '<br>');
+
+
+  
+  }
+  });
+   
+
+chatRef.on("child_added",function(chatsnapshot){
+
+	var playerMsg=chatsnapshot.val().Msg
+	var playerName=chatsnapshot.val().Name
+
+
+$('#displaychat').append(playerName +":"+ playerMsg+"<br>")
+chatRef.onDisconnect().remove();
+
+})
+chatRef.on("child_removed",function(chatsnapshot){
+
+	var playerMsg=chatsnapshot.val().Msg
+	var playerName=chatsnapshot.val().Name
+
+
+$('#displaychat').append(playerName + "has disconnected<br>")
+
+})
+
+
+
+
+
+
 
 
 
@@ -345,47 +414,7 @@ turnRef.on("value", function(turn){
 
   $('#player2Choices').empty();
   $('#player1Choices').empty(); 
-
-playersRef.on("child_changed", function(statsnapshot){
-
-
-var key = statsnapshot.key;
-
-
-if(key === '1' ){
-      
-
-
-      player1.wins = statsnapshot.val().wins;
-      player1.losses = statsnapshot.val().losses;
-
-
-
-     
-
-
-    $('#player1Stats').html("Wins: " + player1.wins + " Losses: " +player1.losses+ '<br>');
-
-    
-}
-
-else if(key === '2'){
-      
-
- 
-      player2.wins = statsnapshot.val().wins;
-      player2.losses = statsnapshot.val().losses;
-
-
-      
-   
-  $('#player2Stats').html("Wins: " + player2.wins + " Losses: " +player2.losses+ '<br>');
-
-
-  
-  }
-  });
-    turnRef.set(1);
+ turnRef.set(1);
     
 }
 
@@ -398,6 +427,7 @@ else if(key === '2'){
 // }
 
 })
+
 })
 
 
@@ -453,4 +483,19 @@ $('body').on('click', '.player2Choices', function(){
 
 })
 
+
+$('body').on("click", "#send", function(){
+
+	var msg=$('#chatbox').val().trim();
+
+	chatRef.push({
+
+		Msg:msg,
+		Name:$("#playerName").val()
+	})
+
+$("#chatbox").val("");
+
+
+})
 
